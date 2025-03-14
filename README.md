@@ -61,6 +61,7 @@ pip install -r requirements.txt
 
 Áp Dụng Migrations vào Database:
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 

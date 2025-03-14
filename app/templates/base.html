@@ -38,6 +38,13 @@
             color: #ffca2c;
             text-decoration: underline;
         }
+        .overdue-badge {
+            position: relative;
+            top: -10px;
+            left: -5px;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+        }
     </style>
 </head>
 <body>
@@ -56,8 +63,14 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         {% if user.userprofile.avatar %}
                             <img src="{{ user.userprofile.avatar.url }}" alt="Avatar" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;">
+                            {% if overdue_tasks > 0 %}
+                                <span class="badge bg-danger overdue-badge">{{ overdue_tasks }}</span>
+                            {% endif %}
                         {% else %}
                             👤
+                            {% if overdue_tasks > 0 %}
+                                <span class="badge bg-danger overdue-badge">{{ overdue_tasks }}</span>
+                            {% endif %}
                         {% endif %}
                         {{ user.username }}
                     </a>
@@ -82,6 +95,14 @@
 
 <!-- Main content -->
 <div class="container mt-4 content-wrapper">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
     {% block content %}
     {% endblock %}
 </div>

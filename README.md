@@ -7,8 +7,8 @@
 # Mô tả Dự án
 
 Xây dựng một ứng dụng quản lý công việc:
-- **Đăng ký & Đăng nhập:** Tạo tài khoản và đăng nhập để sử dụng hệ thống.
-- **Đăng tải & Quản lý Task:** Viết task, hỗ trợ hình ảnh.
+- **Đăng ký & Đăng nhập:** Tạo tài khoản và đăng nhập để sử dụng hệ thống,  cho phép user có thể upload avatar.
+- **Đăng tải & Quản lý Task:** Viết task.
 - **Chức năng:**  Chức năng hiển thị số công việc trễ hạn.
 
 # Hướng dẫn cài dặt và chạy chương trình

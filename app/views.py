@@ -6,10 +6,56 @@ from .forms import RegisterForm, LoginForm, UserPasswordChangeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import update_session_auth_hash
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from .forms import UserProfileForm
 from .models import UserProfile
+from .models import Task
+from django.shortcuts import render, redirect
+from .forms import TaskForm
+from .models import Task
+from .models import Task
+from django.utils import timezone
 
+# your_app/views.py
+@login_required
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    task.delete()
+    messages.success(request, f'"{task.title}" đã được xóa!')
+    return redirect('home')
+
+@login_required
+def mark_task_pending(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    if task.status != 'pending':
+        task.status = 'pending'
+        task.finished = None
+        task.save()
+        messages.success(request, f'"{task.title}" đã được đánh dấu chưa hoàn thành!')
+    return redirect('home')
+
+@login_required
+def mark_task_completed(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    if task.status != 'completed':
+        task.status = 'completed'
+        task.finished = timezone.now()  # Sử dụng timezone để xử lý thời gian
+        task.save()
+        messages.success(request, f'"{task.title}" đã được đánh dấu hoàn thành!')
+    return redirect('home')
+
+@login_required
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            messages.success(request, 'Công việc đã được tạo thành công!')
+            return redirect('home')
+    else:
+        form = TaskForm()
+    return render(request, 'create_task.html', {'form': form})
 
 @login_required
 def update_avatar(request):
@@ -26,10 +72,19 @@ def update_avatar(request):
     
     return render(request, 'update_avatar.html', {'form': form})
 
-# Trang home, chỉ có thể truy cập nếu người dùng đã đăng nhập
+
 @login_required
 def home(request):
-    return render(request, 'home.html', {})
+    if request.user.is_authenticated:
+        tasks = Task.objects.filter(user=request.user)
+        # Tính số công việc trễ hạn
+        overdue_tasks = tasks.filter(status='pending', deadline__lt=timezone.now()).count()
+        print(f"Debug: User={request.user.username}, Overdue Tasks={overdue_tasks}, Total Tasks={tasks.count()}")  # Debug
+    else:
+        tasks = Task.objects.none()
+        overdue_tasks = 0
+    
+    return render(request, 'home.html', {'tasks': tasks, 'overdue_tasks': overdue_tasks})
 
 # View đăng ký
 def register_view(request):

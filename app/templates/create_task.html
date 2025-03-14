@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Tạo công việc mới{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Tạo công việc mới</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Hiển thị tất cả các trường trong form -->
+        <button type="submit" class="btn btn-success">Tạo công việc</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>
+{% endblock %}

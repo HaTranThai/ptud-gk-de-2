@@ -3,83 +3,79 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h2>All Task</h2>
+<div class="container mt-5">
+    <h2>Trang chủ</h2>
+    
+    <!-- Hiển thị ảnh đại diện và cảnh báo trễ hạn -->
+    {% if user.is_authenticated %}
+        <div class="mb-4">
+            <h4>Chào {{ user.username }}!</h4>
+            {% if user.userprofile.avatar %}
+                <img src="{{ user.userprofile.avatar.url }}" alt="Avatar" style="width: 150px; height: 150px; border-radius: 50%;">
+            {% else %}
+                <p>Bạn chưa có ảnh đại diện. <a href="{% url 'update_avatar' %}">Cập nhật ngay</a></p>
+            {% endif %}
+            <!-- Cảnh báo số công việc trễ hạn -->
+            {% if overdue_tasks > 0 %}
+                <div class="alert alert-danger mt-3" role="alert">
+                    Bạn có <strong>{{ overdue_tasks }}</strong> công việc trễ hạn! Vui lòng hoàn thành ngay.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Nút tạo task -->
+        <a href="{% url 'create_task' %}" class="btn btn-primary mb-3">Thêm công việc mới</a>
+
+        <!-- Danh sách task -->
+        <h3>Danh sách công việc</h3>
+        {% if tasks %}
         <div class="row">
-            {% for post in posts %}
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+            <div class="col-md-12">
+                {% for task in tasks %}
+                    <div class="card mb-3 shadow-sm">
                         <div class="card-body">
-                            <h5 class="card-title">{{ post.title }}</h5>
-                            <p class="card-text">{{ post.story|truncatewords:20 }}</p>
-                            
-                            <!-- Thêm nút theo dõi -->
-                            {% if not request.user.is_authenticated %}
-                                <a href="{% url 'login' %}" class="btn btn-primary">Login to Follow</a>
-                            {% else %}
-                                {% if post in request.user.postfollow_set.all %}
-                                    <a href="{% url 'unfollow_post' post.id %}" class="btn btn-danger">Unfollow</a>
+                            <h5 class="card-title">{{ task.title }}</h5>
+                            <p class="card-text">{{ task.content }}</p>
+                            <p class="card-text">
+                                <strong>Tình trạng: </strong>
+                                {% if task.status == 'completed' %}
+                                    <span class="badge bg-success">Đã hoàn thành</span>
+                                    <a href="{% url 'mark_task_pending' task.id %}" class="btn btn-warning btn-sm ms-2">Chưa hoàn thành</a>
                                 {% else %}
-                                    <a href="{% url 'follow_post' post.id %}" class="btn btn-success">Follow</a>
+                                    <span class="badge bg-warning">Chưa hoàn thành</span>
+                                    <a href="{% url 'mark_task_completed' task.id %}" class="btn btn-success btn-sm ms-2">Hoàn thành</a>
                                 {% endif %}
+                            </p>
+                            <p class="card-text">
+                                <strong>Thời gian tạo: </strong>{{ task.created|date:"d/m/Y H:i" }}
+                            </p>
+                            <p class="card-text">
+                                <strong>Thời gian hoàn thành: </strong>
+                                {% if task.finished %}
+                                    {{ task.finished|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    Chưa hoàn thành
+                                {% endif %}
+                            </p>
+                            {% if task.deadline %}
+                                <p class="card-text">
+                                    <strong>Thời hạn: </strong>{{ task.deadline|date:"d/m/Y H:i" }}
+                                    {% if task.is_overdue %}
+                                        <span class="badge bg-danger">Trễ hạn</span>
+                                    {% endif %}
+                                </p>
                             {% endif %}
-                            
-                            <a href="{% url 'post_detail' post.id %}" class="btn btn-info">Read More</a>
+                            <a href="{% url 'delete_task' task.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
-    
-    <!-- Pagination -->
-    {% if posts.has_other_pages %}
-    <nav aria-label="Page navigation example" class="mt-2" style="font-size: 0.7rem; padding: 0.5rem 0;">
-        <ul class="pagination justify-content-center" style="font-size: 0.7rem; padding: 0.1rem 0.3rem; gap: 3px;">
-            {% if posts.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ posts.previous_page_number }}" aria-label="Previous" style="padding: 0.2rem 0.5rem;">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            {% else %}
-            <li class="page-item disabled">
-                <span class="page-link" aria-label="Previous" style="padding: 0.2rem 0.5rem;">&laquo;</span>
-            </li>
-            {% endif %}
-
-            {% for num in posts.paginator.page_range %}
-                {% if num == 1 or num == posts.paginator.num_pages or num|add:"-1" <= posts.number and num|add:"1" >= posts.number %}
-                    {% if posts.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link" style="padding: 0.2rem 0.5rem;">{{ num }}</span>
-                    </li>
-                    {% else %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}" style="padding: 0.2rem 0.5rem;">{{ num }}</a>
-                    </li>
-                    {% endif %}
-                {% elif num == posts.number|add:"-2" or num == posts.number|add:"2" %}
-                    <li class="page-item disabled">
-                        <span class="page-link" style="padding: 0.2rem 0.5rem;">...</span>
-                    </li>
-                {% endif %}
-            {% endfor %}
-
-            {% if posts.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ posts.next_page_number }}" aria-label="Next" style="padding: 0.2rem 0.5rem;">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            {% else %}
-            <li class="page-item disabled">
-                <span class="page-link" aria-label="Next" style="padding: 0.2rem 0.5rem;">&raquo;</span>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
+    {% else %}
+        <p>Bạn chưa có công việc nào.</p>
+    {% endif %}
+    {% else %}
+        <p>Vui lòng <a href="{% url 'login' %}">đăng nhập</a> để xem danh sách công việc.</p>
     {% endif %}
 </div>
 {% endblock %}

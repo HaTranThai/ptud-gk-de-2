@@ -22,7 +22,7 @@ git clone https://github.com/HaTranThai/ptud-gk-de-2.git
 
 Vào thư mục hệ thống:
 ```bash
-cd ptud-gk-de-1
+cd ptud-gk-de-2
 ```
 
 ### Cài đặt mô trường ảo

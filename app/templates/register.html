@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - BlogApp{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4 text-center">Sign up for an account</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="POST">
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="form-group mb-3">
+                    {{ form.username.label_tag }}  <!-- Hiển thị label -->
+                    <input type="text" name="username" class="form-control" value="{{ form.username.value|default:'' }}">
+                    {{ form.username.errors }} <!-- Hiển thị lỗi nếu có -->
+                </div>
+
+                <!-- Email -->
+                <div class="form-group mb-3">
+                    {{ form.email.label_tag }}
+                    <input type="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}">
+                    {{ form.email.errors }} <!-- Hiển thị lỗi nếu có -->
+                </div>
+
+                <!-- Password1 -->
+                <div class="form-group mb-3">
+                    {{ form.password1.label_tag }}
+                    <input type="password" name="password1" class="form-control">
+                    {{ form.password1.errors }} <!-- Hiển thị lỗi nếu có -->
+                </div>
+
+                <!-- Password2 -->
+                <div class="form-group mb-3">
+                    {{ form.password2.label_tag }}
+                    <input type="password" name="password2" class="form-control">
+                    {{ form.password2.errors }} <!-- Hiển thị lỗi nếu có -->
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mb-4">Sign up</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

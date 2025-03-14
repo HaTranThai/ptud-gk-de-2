@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h2>All Task</h2>
+        <div class="row">
+            {% for post in posts %}
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="card-text">{{ post.story|truncatewords:20 }}</p>
+                            
+                            <!-- Thêm nút theo dõi -->
+                            {% if not request.user.is_authenticated %}
+                                <a href="{% url 'login' %}" class="btn btn-primary">Login to Follow</a>
+                            {% else %}
+                                {% if post in request.user.postfollow_set.all %}
+                                    <a href="{% url 'unfollow_post' post.id %}" class="btn btn-danger">Unfollow</a>
+                                {% else %}
+                                    <a href="{% url 'follow_post' post.id %}" class="btn btn-success">Follow</a>
+                                {% endif %}
+                            {% endif %}
+                            
+                            <a href="{% url 'post_detail' post.id %}" class="btn btn-info">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if posts.has_other_pages %}
+    <nav aria-label="Page navigation example" class="mt-2" style="font-size: 0.7rem; padding: 0.5rem 0;">
+        <ul class="pagination justify-content-center" style="font-size: 0.7rem; padding: 0.1rem 0.3rem; gap: 3px;">
+            {% if posts.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ posts.previous_page_number }}" aria-label="Previous" style="padding: 0.2rem 0.5rem;">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-label="Previous" style="padding: 0.2rem 0.5rem;">&laquo;</span>
+            </li>
+            {% endif %}
+
+            {% for num in posts.paginator.page_range %}
+                {% if num == 1 or num == posts.paginator.num_pages or num|add:"-1" <= posts.number and num|add:"1" >= posts.number %}
+                    {% if posts.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link" style="padding: 0.2rem 0.5rem;">{{ num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}" style="padding: 0.2rem 0.5rem;">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% elif num == posts.number|add:"-2" or num == posts.number|add:"2" %}
+                    <li class="page-item disabled">
+                        <span class="page-link" style="padding: 0.2rem 0.5rem;">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if posts.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ posts.next_page_number }}" aria-label="Next" style="padding: 0.2rem 0.5rem;">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-label="Next" style="padding: 0.2rem 0.5rem;">&raquo;</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
